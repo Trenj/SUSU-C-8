@@ -4,6 +4,8 @@
 #include <vector>
 #include <mutex>
 
+std::mutex mtx; // Global mutex
+
 class DataHandler {
 public:
     virtual void process(std::ifstream& in, std::ofstream& out) = 0;
@@ -14,33 +16,39 @@ public:
     void process(std::ifstream& in, std::ofstream& out) override {
         std::string word;
         int count = 0;
+
         while (in >> word) {
             ++count;
         }
+
+        std::lock_guard<std::mutex> guard(mtx); // Ensure safe write
         out << "Number of words: " << count << std::endl;
     }
 };
 
 int main() {
     std::vector<std::thread> threads;
-    std::mutex mtx;
 
-    // Замените эти имена на имена ваших файлов
-    std::vector<std::string> fileNames = { "file1.txt", "file2.txt", "file3.txt" };
+    std::vector<std::string> fileNames = { "file1.txt", "file2.txt" };
+    std::string resultFileName = "result.txt";
+
+    std::ofstream resultFile(resultFileName);
 
     for (const auto& fileName : fileNames) {
-        std::ifstream in(fileName);
-        std::ofstream out(fileName + ".processed");
+        std::ifstream infile(fileName);
 
-        WordCounter counter;
-        threads.push_back(std::thread([&] {
-            counter.process(in, out);
-            }));
+        threads.emplace_back([&, fileName]() {
+            std::ifstream in(fileName);  // Moved ifstream inside the thread
+            WordCounter counter;
+            counter.process(in, resultFile);
+            });
     }
 
     for (auto& thread : threads) {
         thread.join();
     }
+
+    resultFile.close();
 
     return 0;
 }
