@@ -4,29 +4,34 @@
 #include <vector>
 #include <mutex>
 
-std::mutex mtx; // Global mutex
+std::mutex mtx; // глобальный мьютекс для синхронизации доступа к файлу результатов
 
-class DataHandler {
+class DataHandler 
+{
 public:
     virtual void process(std::ifstream& in, std::ofstream& out) = 0;
 };
 
-class WordCounter : public DataHandler {
+class WordCounter : public DataHandler 
+{
 public:
-    void process(std::ifstream& in, std::ofstream& out) override {
+    void process(std::ifstream& in, std::ofstream& out) override 
+    {
         std::string word;
         int count = 0;
 
-        while (in >> word) {
+        while (in >> word) 
+        {
             ++count;
         }
 
-        std::lock_guard<std::mutex> guard(mtx); // Ensure safe write
+        std::lock_guard<std::mutex> guard(mtx); // Обеспечение безопасной записи
         out << "Number of words: " << count << std::endl;
     }
 };
 
-int main() {
+int main() 
+{
     std::vector<std::thread> threads;
 
     std::vector<std::string> fileNames = { "file1.txt", "file2.txt" };
@@ -38,7 +43,7 @@ int main() {
         std::ifstream infile(fileName);
 
         threads.emplace_back([&, fileName]() {
-            std::ifstream in(fileName);  // Moved ifstream inside the thread
+            std::ifstream in(fileName);  // Перемещение ifstream внутрь потока
             WordCounter counter;
             counter.process(in, resultFile);
             });
