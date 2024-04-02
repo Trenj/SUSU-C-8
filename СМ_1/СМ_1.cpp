@@ -9,7 +9,7 @@ std::mutex mtx; // глобальный мьютекс для синхрониз
 class DataHandler 
 {
 public:
-    virtual void process(std::ifstream& in, std::ofstream& out) = 0;
+    virtual void process(std::ifstream& in, std::ofstream& out) = 0;    // метод для обрабоки данных
 };
 
 class WordCounter : public DataHandler 
