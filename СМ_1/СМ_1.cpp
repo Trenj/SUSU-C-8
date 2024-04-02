@@ -39,17 +39,20 @@ int main()
 
     std::ofstream resultFile(resultFileName);
 
-    for (const auto& fileName : fileNames) {
+    for (const auto& fileName : fileNames) 
+    {
         std::ifstream infile(fileName);
 
-        threads.emplace_back([&, fileName]() {
+        threads.emplace_back([&, fileName]() 
+            {
             std::ifstream in(fileName);  // Перемещение ifstream внутрь потока
             WordCounter counter;
             counter.process(in, resultFile);
             });
     }
 
-    for (auto& thread : threads) {
+    for (auto& thread : threads) 
+    {
         thread.join();
     }
 
